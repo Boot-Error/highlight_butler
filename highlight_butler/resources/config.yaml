@@ -1,0 +1,14 @@
+butler:
+  importers:
+    hypothesis:
+      apikey: ""
+      tagPrefix: "highlight/"
+      category: "hypothesis"
+      groups:
+        - "my highlight library" 
+  renderer:
+    markdown:
+      markdown_notes_dir: "./pages/"
+      meta:
+        tags: ["highlight"]
+        category: "highlight"
