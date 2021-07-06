@@ -14,3 +14,4 @@ butler:
         category: "highlight"
   library:
     dir: "./pages/"
+    filenamePrefix: "highlight_"

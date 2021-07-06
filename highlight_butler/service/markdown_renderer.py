@@ -15,6 +15,7 @@ class Jinja2Renderer:
         # setup custom filers
         env = jinja2.Environment(lstrip_blocks=True, trim_blocks=True)
         env.filters["prettyDate"] = Jinja2Renderer.prettyDateFilter
+        env.filters["asTag"] = Jinja2Renderer.asTagFilter
         # load template
         self.template = env.from_string(template)
 
@@ -32,7 +33,10 @@ class Jinja2Renderer:
         suffix = 'th' if 11 <= isodt.day <= 13 else {
             1: 'st', 2: 'nd', 3: 'rd'}.get(isodt.day % 10, 'th')
         return isodt.strftime("%B {S}, %Y").replace('{S}', str(isodt.day) + suffix)
-
+        
+    @staticmethod
+    def asTagFilter(value: str) -> str:
+        return "#{tag}".format(tag=value)
 
 class MarkdownRendererService(HighlightRendererService):
     def __init__(self):

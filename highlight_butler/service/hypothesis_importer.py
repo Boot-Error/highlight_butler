@@ -82,9 +82,10 @@ class HypothesisImporterService(HighlightImporterService):
 
         # get common values from one annotation
         _annotation = pydash.arrays.head(annotations)
+        _tagPrefix = self._config.get_value("butler.importers.hypothesis.tagPrefix")
 
         highlightDocument: HighlightDocument = HighlightDocument(
-            author="no-one",
+            author="Highlight Butler",
             created=datetime.utcnow().replace(tzinfo=timezone.utc),
             updated=datetime.fromtimestamp(0, timezone.utc),
             # TODO: remove improvised array indexing
@@ -93,7 +94,9 @@ class HypothesisImporterService(HighlightImporterService):
             highlights=list(map(self._annotation_to_highlight, annotations)),
             category=self._config.get_value(
                 "butler.importers.hypothesis.category"),
-            tags=[]
+            tags=pydash.py_(annotations).map(lambda annotation: pydash.get(annotation, "tags"))
+                        .reduce(lambda allTags, tags: allTags + pydash.map_(tags, lambda t: "#{prefix}{tag}".format(prefix=_tagPrefix, tag=t)), [])
+                        .value()
         )
         highlightDocument = self._update_document_time(highlightDocument, annotations)
         return highlightDocument

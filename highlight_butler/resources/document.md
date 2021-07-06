@@ -2,7 +2,7 @@
 title: {{doc.title}}
 created: {{doc.created | prettyDate}}
 author: {{doc.author}}
-tags: {{doc.tags}}
+tags: {{doc.tags | join(",")}}
 category: {{doc.category}}
 url: {{doc.url}}
 ---
@@ -11,7 +11,7 @@ url: {{doc.url}}
 
 ## Content
   {% for highlight in doc.highlights %}
-  - {{highlight.text}}
+  - {{highlight.text}} {{highlight.tags | map('asTag') | join(" ")}}
     {% if highlight.annotation %}
     - {{highlight.annotation}}
     {% endif %}
