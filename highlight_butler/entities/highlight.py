@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Optional
+from datetime import datetime
 
 @dataclass
 class HighlightLocation:
@@ -18,7 +19,8 @@ class HighlightDocument:
     author: str
     category: str
     tags: str
-    created: str
+    created: datetime
+    updated: datetime
     url: str
     title: str
     highlights: List[Highlight]

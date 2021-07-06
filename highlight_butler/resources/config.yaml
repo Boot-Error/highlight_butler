@@ -8,7 +8,9 @@ butler:
         - "my highlight library" 
   renderer:
     markdown:
-      markdown_notes_dir: "./pages/"
+      template: "./highlight_butler/resources/document.md"
       meta:
         tags: ["highlight"]
         category: "highlight"
+  library:
+    dir: "./pages/"

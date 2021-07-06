@@ -2,6 +2,7 @@ import functools
 import itertools
 from highlight_butler.entities.highlight import Highlight, HighlightDocument, HighlightLocation
 from typing import List, Optional
+from datetime import timezone, datetime
 
 import requests
 import pydash
@@ -72,7 +73,7 @@ class HypothesisImporterService(HighlightImporterService):
         highlightDocuments: List[HighlightDocument] = []
         for url, annotations in annotations_by_uri:
             highlightDocument = self._create_highlight_document(
-                url=url, annotations=annotations)
+                url=url, annotations=list(annotations))
             highlightDocuments.append(highlightDocument)
 
         return highlightDocuments
@@ -84,15 +85,46 @@ class HypothesisImporterService(HighlightImporterService):
 
         highlightDocument: HighlightDocument = HighlightDocument(
             author="no-one",
-            created="hello, world",
-            title=pydash.get(_annotation, "document.title"),
+            created=datetime.utcnow().replace(tzinfo=timezone.utc),
+            updated=datetime.fromtimestamp(0, timezone.utc),
+            # TODO: remove improvised array indexing
+            title=pydash.get(_annotation, "document.title")[0],
             url=pydash.get(_annotation, "uri"),
             highlights=list(map(self._annotation_to_highlight, annotations)),
             category=self._config.get_value(
                 "butler.importers.hypothesis.category"),
             tags=[]
         )
+        highlightDocument = self._update_document_time(highlightDocument, annotations)
         return highlightDocument
+        
+    def _update_document_time(self, highlightDocument: HighlightDocument, annotations: List[dict]) -> HighlightDocument:
+        """
+        Calculates created date and update dates based on heuristics and updates the Highlight Document
+
+        - create is oldest created time of all the highlights
+        - updated is latest update ttime of all the highlights
+        """
+        created = highlightDocument.created
+        updated = highlightDocument.updated
+        for annotation in annotations:
+            annotation_created = pydash.get(annotation, "created")
+            annotation_created = self._parse_isodatetime(annotation_created)
+            if created > annotation_created:
+                created = annotation_created
+                
+            annotation_updated = pydash.get(annotation, "updated")
+            annotation_updated = self._parse_isodatetime(annotation_updated)
+            if updated < annotation_updated:
+                updated = annotation_updated
+        
+        highlightDocument.created = created
+        highlightDocument.updated = updated
+        
+        return highlightDocument
+            
+    def _parse_isodatetime(self, time: str) -> datetime:
+        return datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.%f%z')
 
     def _annotation_to_highlight(self, annotation: dict) -> Highlight:
         _tagPrefix = self._config.get_value(

@@ -6,6 +6,6 @@ class HighlightRenderer:
     def __init__(self, service: HighlightRendererService):
         self._service: HighlightRendererService = service
         
-    def render_highlight(self, document: HighlightDocument):
+    def render_highlight(self, document: HighlightDocument) -> str:
         rendered_document = self._service.render_document(document)
         return rendered_document
