@@ -1,6 +1,6 @@
 ---
 title: {{doc.title}}
-created: {{doc.created}}
+created: {{doc.created | prettyDate}}
 author: {{doc.author}}
 tags: {{doc.tags}}
 category: {{doc.category}}

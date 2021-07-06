@@ -1,15 +1,22 @@
-from highlight_butler.utils.singleton import Singleton
+from datetime import datetime
 from typing import List, Optional
+
+import jinja2
 from frontmatter import Frontmatter
-from jinja2 import Template
-from highlight_butler.usecase.highlight_renderer.contract import HighlightRendererService
 from highlight_butler.entities.highlight import Highlight, HighlightDocument
+from highlight_butler.usecase.highlight_renderer.contract import \
+    HighlightRendererService
 from highlight_butler.utils.config import Config
+from highlight_butler.utils.singleton import Singleton
 
 
 class Jinja2Renderer:
     def __init__(self, template: str):
-        self.template = Template(template, lstrip_blocks=True, trim_blocks=True)
+        # setup custom filers
+        env = jinja2.Environment(lstrip_blocks=True, trim_blocks=True)
+        env.filters["prettyDate"] = Jinja2Renderer.prettyDateFilter
+        # load template
+        self.template = env.from_string(template)
 
     def render(self, args: str) -> str:
         try:
@@ -18,6 +25,13 @@ class Jinja2Renderer:
         except Exception as e:
             print("Failed to render template due to", e)
             return ""
+
+    @staticmethod
+    def prettyDateFilter(value: str) -> str:
+        isodt: datetime = value
+        suffix = 'th' if 11 <= isodt.day <= 13 else {
+            1: 'st', 2: 'nd', 3: 'rd'}.get(isodt.day % 10, 'th')
+        return isodt.strftime("%B {S}, %Y").replace('{S}', str(isodt.day) + suffix)
 
 
 class MarkdownRendererService(HighlightRendererService):
