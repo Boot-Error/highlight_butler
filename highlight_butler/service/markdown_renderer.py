@@ -32,7 +32,7 @@ class Jinja2Renderer:
         isodt: datetime = value
         suffix = 'th' if 11 <= isodt.day <= 13 else {
             1: 'st', 2: 'nd', 3: 'rd'}.get(isodt.day % 10, 'th')
-        return isodt.strftime("%B {S}, %Y").replace('{S}', str(isodt.day) + suffix)
+        return isodt.strftime("%b {S}, %Y").replace('{S}', str(isodt.day) + suffix)
         
     @staticmethod
     def asTagFilter(value: str) -> str:
